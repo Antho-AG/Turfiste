@@ -55,14 +55,16 @@ export const CRITERIA = [
 export const NOTE_MIN = 0;
 export const NOTE_MAX = 20;
 
-// Seuils de tier sur la note finale /100.
-// En Phase 1 ce sont des seuils fixes (pas de percentile historique — on n'a
-// pas encore de base de courses passées). À réviser en Phase 3 une fois que
-// le backtesting donne une vraie distribution de référence.
-export const TIER_THRESHOLDS = [
-  { tier: 'S', min: 85, color: '#e8c468' },
-  { tier: 'A', min: 70, color: '#8fd9c4' },
-  { tier: 'B', min: 55, color: '#8fb8e8' },
-  { tier: 'C', min: 40, color: '#b8a4d9' },
-  { tier: 'D', min: 0, color: '#d98f9c' },
+// Seuils de tier basés sur le z-score (écart à la moyenne du peloton, en
+// écarts-types). Contrairement à des seuils absolus sur la note /100, ça
+// fait que le tier reflète la position DANS CETTE COURSE précise : un
+// cheval à 50/100 peut être S si tout le reste du peloton est sous 30,
+// et un cheval à 80/100 peut n'être que B dans un peloton très relevé où
+// tout le monde tourne autour de 85.
+export const TIER_Z_THRESHOLDS = [
+  { tier: 'S', minZ: 1.2, color: '#e8c468' },
+  { tier: 'A', minZ: 0.4, color: '#8fd9c4' },
+  { tier: 'B', minZ: -0.4, color: '#8fb8e8' },
+  { tier: 'C', minZ: -1.2, color: '#b8a4d9' },
+  { tier: 'D', minZ: -Infinity, color: '#d98f9c' },
 ];

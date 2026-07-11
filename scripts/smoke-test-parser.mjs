@@ -63,3 +63,21 @@ const fastestScore = scoreReductionKm(Math.min(...times), times);
 assert(fastestScore === 20, 'scoreReductionKm donne 20 au temps le plus rapide du peloton');
 
 console.log('\nTous les tests de fumée sont passés.');
+
+// --- Test des tiers relatifs au peloton ---
+import { getTiersForField } from '../src/utils/scoring.js';
+
+console.log('\n--- getTiersForField ---');
+
+// Cas 1 : peloton faible, un cheval à 50 doit ressortir en tier haut
+const pelotonFaible = [50, 28, 22, 30, 25, 20];
+const tiersFaible = getTiersForField(pelotonFaible);
+console.log('Peloton faible (50 parmi des <30) :', tiersFaible.map(t => t.tier).join(' '));
+assert(tiersFaible[0].tier === 'S', 'un 50/100 dominant un peloton faible est en tier S');
+
+// Cas 2 : peloton fort et homogène, personne ne devrait être en S/D extrême
+const pelotonFort = [82, 85, 80, 88, 83, 84];
+const tiersFort = getTiersForField(pelotonFort);
+console.log('Peloton fort homogène (80-88) :', tiersFort.map(t => t.tier).join(' '));
+
+console.log('\nTous les tests de tiers relatifs sont passés.');

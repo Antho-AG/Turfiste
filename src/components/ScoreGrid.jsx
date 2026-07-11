@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { CRITERIA, NOTE_MAX } from '../data/criteria';
-import { calculateNote, calculateValue, getTier } from '../utils/scoring';
+import { calculateNote, calculateValue, getTiersForField } from '../utils/scoring';
 
 export default function ScoreGrid({
   horses,
@@ -14,9 +14,12 @@ export default function ScoreGrid({
   // On dérive note / tier / value à l'affichage plutôt que de les stocker :
   // ça évite tout risque de désynchronisation si un critère ou une cote change.
   const rows = useMemo(() => {
-    const withScores = horses.map((horse) => {
-      const note = calculateNote(horse.criteriaScores);
-      const tier = getTier(note);
+    const notes = horses.map((h) => calculateNote(h.criteriaScores));
+    const tiers = getTiersForField(notes);
+
+    const withScores = horses.map((horse, i) => {
+      const note = notes[i];
+      const tier = tiers[i];
       const value = calculateValue(note, parseFloat(horse.cote));
       return { horse, note, tier, value };
     });
@@ -109,7 +112,11 @@ export default function ScoreGrid({
               ))}
               <td className="col-computed col-note">{note}</td>
               <td className="col-tier">
-                <span className="tier-badge" style={{ backgroundColor: tier.color }}>
+                <span
+                  className="tier-badge"
+                  style={{ backgroundColor: tier.color }}
+                  title={`z = ${tier.z} par rapport au peloton de cette course`}
+                >
                   {tier.tier}
                 </span>
               </td>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import RaceHeader from './components/RaceHeader';
 import ScoreGrid from './components/ScoreGrid';
 import AnalyseCourse from './components/AnalyseCourse';
+import ProgrammeDuJour from './components/ProgrammeDuJour';
 import { createEmptyHorse } from './utils/scoring';
 import {
   archiveRace,
@@ -150,7 +151,11 @@ export default function App() {
       )}
 
       <main>
-        <AnalyseCourse onResult={handleAnalysisResult} />
+        <ProgrammeDuJour onResult={handleAnalysisResult} />
+        <details className="fallback-url">
+          <summary>La course que je cherche n'apparaît pas dans le programme</summary>
+          <AnalyseCourse onResult={handleAnalysisResult} />
+        </details>
         <RaceHeader race={race} onChange={setRace} />
         <ScoreGrid
           horses={race.horses}

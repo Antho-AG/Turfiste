@@ -1,4 +1,4 @@
-import { CRITERIA, NOTE_MAX, TIER_THRESHOLDS } from '../data/criteria';
+import { CRITERIA, NOTE_MAX, TIER_Z_THRESHOLDS } from '../data/criteria.js';
 
 // Sécurité de dev : si les poids ne totalisent pas 1.0, on le signale fort
 // plutôt que de laisser une note faussée passer inaperçue.
@@ -26,13 +26,32 @@ export function calculateNote(criteriaScores) {
 }
 
 /**
- * Détermine le tier (S/A/B/C/D) à partir de la note /100.
- * @param {number} note
- * @returns {{tier: string, color: string}}
+ * Calcule le tier de CHAQUE cheval d'une course en fonction de sa position
+ * relative dans le peloton du jour (z-score), pas d'un barème absolu.
+ *
+ * @param {number[]} notes - notes /100 de tous les chevaux de la course, dans
+ *        n'importe quel ordre — le résultat est renvoyé dans le même ordre.
+ * @returns {{tier: string, color: string, z: number}[]}
  */
-export function getTier(note) {
-  const found = TIER_THRESHOLDS.find((t) => note >= t.min);
-  return found ?? TIER_THRESHOLDS[TIER_THRESHOLDS.length - 1];
+export function getTiersForField(notes) {
+  if (notes.length === 0) return [];
+
+  const mean = notes.reduce((sum, n) => sum + n, 0) / notes.length;
+  const variance = notes.reduce((sum, n) => sum + (n - mean) ** 2, 0) / notes.length;
+  const stdev = Math.sqrt(variance);
+
+  return notes.map((note) => {
+    // Peloton trop homogène (ou un seul partant) : impossible de différencier
+    // sérieusement, tout le monde reste en B plutôt que d'inventer un écart.
+    if (stdev < 0.5) {
+      const flat = TIER_Z_THRESHOLDS.find((t) => t.tier === 'B');
+      return { ...flat, z: 0 };
+    }
+
+    const z = (note - mean) / stdev;
+    const found = TIER_Z_THRESHOLDS.find((t) => z >= t.minZ);
+    return { ...(found ?? TIER_Z_THRESHOLDS[TIER_Z_THRESHOLDS.length - 1]), z: Math.round(z * 100) / 100 };
+  });
 }
 
 /**
