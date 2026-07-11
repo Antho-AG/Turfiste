@@ -1,136 +1,155 @@
-import { useMemo, useState } from 'react'
-import { CRITERIA, SCORE_MIN, SCORE_MAX, SCORE_STEP } from '../data/criteria.js'
-import { calculateNote, getTier, calculateValue } from '../utils/scoring.js'
+import { useMemo } from 'react';
+import { CRITERIA, NOTE_MAX } from '../data/criteria';
+import { calculateNote, calculateValue, getTier } from '../utils/scoring';
 
-function clampScore(value) {
-  if (Number.isNaN(value)) return SCORE_MIN
-  return Math.min(SCORE_MAX, Math.max(SCORE_MIN, value))
-}
-
-export default function ScoreGrid({ horses, onChangeCriteria, onChangeField, onRemoveHorse, onAddHorse }) {
-  const [sortKey, setSortKey] = useState(null) // 'note' | 'value' | null
-  const [sortDir, setSortDir] = useState('desc')
-
+export default function ScoreGrid({
+  horses,
+  onUpdateHorse,
+  onUpdateCriteria,
+  onRemoveHorse,
+  onAddHorse,
+  sortBy,
+  onSortChange,
+}) {
+  // On dérive note / tier / value à l'affichage plutôt que de les stocker :
+  // ça évite tout risque de désynchronisation si un critère ou une cote change.
   const rows = useMemo(() => {
-    const enriched = horses.map((h) => {
-      const note = calculateNote(h)
-      return { horse: h, note, tier: getTier(note), value: calculateValue(note, h.cote) }
-    })
-    if (!sortKey) return enriched
-    const dir = sortDir === 'asc' ? 1 : -1
-    return [...enriched].sort((a, b) => {
-      const av = sortKey === 'note' ? a.note : a.value ?? -Infinity
-      const bv = sortKey === 'note' ? b.note : b.value ?? -Infinity
-      return (av - bv) * dir
-    })
-  }, [horses, sortKey, sortDir])
+    const withScores = horses.map((horse) => {
+      const note = calculateNote(horse.criteriaScores);
+      const tier = getTier(note);
+      const value = calculateValue(note, parseFloat(horse.cote));
+      return { horse, note, tier, value };
+    });
 
-  function toggleSort(key) {
-    if (sortKey !== key) {
-      setSortKey(key)
-      setSortDir('desc')
-    } else {
-      setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))
+    if (sortBy === 'value') {
+      return [...withScores].sort((a, b) => (b.value ?? -1) - (a.value ?? -1));
     }
-  }
+    return [...withScores].sort((a, b) => b.note - a.note);
+  }, [horses, sortBy]);
 
-  function sortIndicator(key) {
-    if (sortKey !== key) return ''
-    return sortDir === 'desc' ? ' ↓' : ' ↑'
-  }
+  const hasAnyCote = horses.some((h) => h.cote);
 
   return (
-    <div className="score-grid">
-      <div className="score-grid__scroll">
-        <table>
-          <thead>
-            <tr>
-              <th className="col-num">#</th>
-              <th className="col-name">Cheval</th>
+    <div className="score-grid-wrapper">
+      <table className="score-grid">
+        <thead>
+          <tr>
+            <th className="col-numero">N°</th>
+            <th className="col-nom">Cheval</th>
+            <th className="col-nom">Driver</th>
+            <th className="col-nom">Entraîneur</th>
+            {CRITERIA.map((c) => (
+              <th key={c.id} className="col-critere" title={c.hint}>
+                {c.label}
+                <span className="col-critere__weight">{Math.round(c.weight * 100)}%</span>
+              </th>
+            ))}
+            <th
+              className="col-computed col-sortable"
+              onClick={() => onSortChange('note')}
+              aria-sort={sortBy === 'note' ? 'descending' : 'none'}
+            >
+              Note {sortBy === 'note' && '▾'}
+            </th>
+            <th className="col-tier">Tier</th>
+            <th className="col-cote">Cote</th>
+            <th
+              className="col-computed col-sortable"
+              onClick={() => onSortChange('value')}
+              aria-sort={sortBy === 'value' ? 'descending' : 'none'}
+            >
+              Value {sortBy === 'value' && '▾'}
+            </th>
+            <th className="col-actions" />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ horse, note, tier, value }) => (
+            <tr key={horse.id}>
+              <td className="col-numero">
+                <input
+                  type="text"
+                  value={horse.numero}
+                  onChange={(e) => onUpdateHorse(horse.id, 'numero', e.target.value)}
+                  maxLength={2}
+                />
+              </td>
+              <td className="col-nom">
+                <input
+                  type="text"
+                  value={horse.nom}
+                  onChange={(e) => onUpdateHorse(horse.id, 'nom', e.target.value)}
+                  placeholder="Nom du cheval"
+                />
+              </td>
+              <td className="col-nom">
+                <input
+                  type="text"
+                  value={horse.driverNom}
+                  onChange={(e) => onUpdateHorse(horse.id, 'driverNom', e.target.value)}
+                />
+              </td>
+              <td className="col-nom">
+                <input
+                  type="text"
+                  value={horse.entraineurNom}
+                  onChange={(e) => onUpdateHorse(horse.id, 'entraineurNom', e.target.value)}
+                />
+              </td>
               {CRITERIA.map((c) => (
-                <th key={c.id} title={c.label} className="col-crit">
-                  {c.short}
-                </th>
-              ))}
-              <th className="col-cote">Cote</th>
-              <th className="col-sortable" onClick={() => toggleSort('note')}>
-                Note{sortIndicator('note')}
-              </th>
-              <th className="col-tier">Tier</th>
-              <th className="col-sortable" onClick={() => toggleSort('value')}>
-                Value{sortIndicator('value')}
-              </th>
-              <th className="col-remove" />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(({ horse, note, tier, value }) => (
-              <tr key={horse.id}>
-                <td className="col-num">
-                  <input
-                    type="text"
-                    value={horse.numero}
-                    onChange={(e) => onChangeField(horse.id, 'numero', e.target.value)}
-                  />
-                </td>
-                <td className="col-name">
-                  <input
-                    type="text"
-                    placeholder="Nom du cheval"
-                    value={horse.nom}
-                    onChange={(e) => onChangeField(horse.id, 'nom', e.target.value)}
-                  />
-                </td>
-                {CRITERIA.map((c) => (
-                  <td key={c.id} className="col-crit">
-                    <input
-                      type="number"
-                      min={SCORE_MIN}
-                      max={SCORE_MAX}
-                      step={SCORE_STEP}
-                      value={horse.criteria[c.id]}
-                      onChange={(e) =>
-                        onChangeCriteria(horse.id, c.id, clampScore(parseFloat(e.target.value)))
-                      }
-                    />
-                  </td>
-                ))}
-                <td className="col-cote">
+                <td key={c.id} className="col-critere">
                   <input
                     type="number"
                     min={0}
-                    step={0.1}
-                    placeholder="—"
-                    value={horse.cote ?? ''}
-                    onChange={(e) => {
-                      const raw = e.target.value
-                      onChangeField(horse.id, 'cote', raw === '' ? null : parseFloat(raw))
-                    }}
+                    max={NOTE_MAX}
+                    value={horse.criteriaScores[c.id] ?? ''}
+                    onChange={(e) => onUpdateCriteria(horse.id, c.id, e.target.value)}
                   />
                 </td>
-                <td className="col-note">{note.toFixed(1)}</td>
-                <td className="col-tier">
-                  <span className={`tier-badge tier-badge--${tier}`}>{tier}</span>
-                </td>
-                <td className="col-value">{value === null ? '—' : value.toFixed(2)}</td>
-                <td className="col-remove">
-                  <button
-                    type="button"
-                    className="btn-icon"
-                    aria-label="Supprimer ce partant"
-                    onClick={() => onRemoveHorse(horse.id)}
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              ))}
+              <td className="col-computed col-note">{note}</td>
+              <td className="col-tier">
+                <span className="tier-badge" style={{ backgroundColor: tier.color }}>
+                  {tier.tier}
+                </span>
+              </td>
+              <td className="col-cote">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  value={horse.cote}
+                  onChange={(e) => onUpdateHorse(horse.id, 'cote', e.target.value)}
+                  placeholder="—"
+                />
+              </td>
+              <td className="col-computed col-value">
+                {value !== null ? value.toFixed(2) : '—'}
+              </td>
+              <td className="col-actions">
+                <button
+                  className="btn-icon"
+                  onClick={() => onRemoveHorse(horse.id)}
+                  aria-label={`Retirer ${horse.nom || 'ce partant'}`}
+                >
+                  ×
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="score-grid__footer">
+        <button className="btn-secondary" onClick={onAddHorse}>
+          + Ajouter un partant
+        </button>
+        {!hasAnyCote && (
+          <span className="score-grid__hint">
+            Renseigne les cotes pour faire apparaître le classement value.
+          </span>
+        )}
       </div>
-      <button type="button" className="btn btn--primary score-grid__add" onClick={onAddHorse}>
-        + Ajouter un partant
-      </button>
     </div>
-  )
+  );
 }

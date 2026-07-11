@@ -1,0 +1,32 @@
+name: Mise à jour stats driver/entraîneur
+
+on:
+  schedule:
+    # Tous les lundis à 4h UTC — pas besoin de fraîcheur temps réel pour
+    # une stat glissante sur 60 jours, une fois par semaine suffit largement.
+    - cron: '0 4 * * 1'
+  workflow_dispatch: # permet aussi de le lancer manuellement depuis l'onglet Actions
+
+permissions:
+  contents: write
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Générer le cache de stats
+        run: node scripts/update-driver-entraineur-stats.mjs
+
+      - name: Commit si changement
+        run: |
+          git config user.name "trot-score-bot"
+          git config user.email "actions@github.com"
+          git add public/data/driver-entraineur-stats.json
+          git diff --staged --quiet || git commit -m "chore: mise à jour stats driver/entraîneur"
+          git push

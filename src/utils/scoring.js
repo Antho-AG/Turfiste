@@ -1,37 +1,70 @@
-import { CRITERIA, TIER_THRESHOLDS } from '../data/criteria.js'
+import { CRITERIA, NOTE_MAX, TIER_THRESHOLDS } from '../data/criteria';
 
-// Note /100 = somme(score critère 0-10 * poids) * 10, poids somme = 1.0.
-export function calculateNote(horse) {
-  const weightedSum = CRITERIA.reduce((sum, c) => {
-    const score = horse.criteria?.[c.id]
-    return sum + (typeof score === 'number' ? score : 0) * c.weight
-  }, 0)
-  const note = weightedSum * 10
-  return Math.round(note * 10) / 10
+// Sécurité de dev : si les poids ne totalisent pas 1.0, on le signale fort
+// plutôt que de laisser une note faussée passer inaperçue.
+const totalWeight = CRITERIA.reduce((sum, c) => sum + c.weight, 0);
+if (Math.abs(totalWeight - 1) > 0.001) {
+  console.warn(
+    `[scoring] Les poids des critères totalisent ${totalWeight}, attendu 1.0`
+  );
 }
 
+/**
+ * Calcule la note finale /100 d'un cheval à partir de ses scores par critère.
+ * @param {Record<string, number>} criteriaScores - ex: { forme: 14, reductionKm: 16, ... }
+ *        Chaque valeur est comprise entre 0 et 20. Un critère non renseigné vaut 0.
+ * @returns {number} note arrondie sur 100
+ */
+export function calculateNote(criteriaScores) {
+  let total = 0;
+  for (const criterion of CRITERIA) {
+    const raw = criteriaScores?.[criterion.id] ?? 0;
+    const normalized = Math.min(Math.max(raw, 0), NOTE_MAX) / NOTE_MAX; // 0-1
+    total += normalized * criterion.weight;
+  }
+  return Math.round(total * 100);
+}
+
+/**
+ * Détermine le tier (S/A/B/C/D) à partir de la note /100.
+ * @param {number} note
+ * @returns {{tier: string, color: string}}
+ */
 export function getTier(note) {
-  const match = TIER_THRESHOLDS.find((t) => note >= t.min)
-  return match ? match.tier : TIER_THRESHOLDS[TIER_THRESHOLDS.length - 1].tier
+  const found = TIER_THRESHOLDS.find((t) => note >= t.min);
+  return found ?? TIER_THRESHOLDS[TIER_THRESHOLDS.length - 1];
 }
 
-// Formule value volontaire, ne pas modifier : (note/100) × cote.
+/**
+ * Calcule la valeur d'un cheval : note normalisée × cote.
+ *
+ * Pourquoi la multiplication et pas la division :
+ * diviser la note par la cote favoriserait mécaniquement les favoris
+ * (cote basse), ce qui est l'inverse de la logique "value" — on cherche
+ * les chevaux dont le marché sous-estime les chances par rapport à notre
+ * propre lecture. Multiplier récompense un bon niveau ET une cote généreuse.
+ *
+ * @param {number} note - note /100
+ * @param {number|null} cote - cote décimale saisie par l'utilisateur
+ * @returns {number|null} value, ou null si aucune cote saisie
+ */
 export function calculateValue(note, cote) {
-  if (typeof cote !== 'number' || !Number.isFinite(cote) || cote <= 0) return null
-  return Math.round((note / 100) * cote * 100) / 100
+  if (!cote || cote <= 0) return null;
+  return Math.round((note / 100) * cote * 100) / 100;
 }
 
-function generateId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
-  return `h_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-}
-
-export function createEmptyHorse(numero) {
+/**
+ * Crée un objet cheval vierge avec un id unique.
+ */
+export function createEmptyHorse(numero = '') {
   return {
-    id: generateId(),
+    id: crypto.randomUUID(),
     numero,
     nom: '',
-    criteria: Object.fromEntries(CRITERIA.map((c) => [c.id, 0])),
-    cote: null,
-  }
+    driverNom: '',
+    entraineurNom: '',
+    criteriaScores: {},
+    cote: '',
+    commentaire: '',
+  };
 }

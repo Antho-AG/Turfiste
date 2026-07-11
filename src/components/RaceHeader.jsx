@@ -1,73 +1,56 @@
-import { useState } from 'react'
-
-export default function RaceHeader({ race, onFieldChange, onNewRace, onArchive, archives, onLoadArchive }) {
-  const [archiveOpen, setArchiveOpen] = useState(false)
+export default function RaceHeader({ race, onChange }) {
+  const update = (field) => (e) => onChange({ ...race, [field]: e.target.value });
 
   return (
-    <header className="race-header">
-      <div className="race-header__fields">
+    <section className="race-header">
+      <div className="race-header__field race-header__field--wide">
+        <label htmlFor="hippodrome">Hippodrome</label>
         <input
-          className="race-header__input race-header__input--name"
+          id="hippodrome"
           type="text"
-          placeholder="Nom de la course"
-          value={race.courseName}
-          onChange={(e) => onFieldChange('courseName', e.target.value)}
-        />
-        <input
-          className="race-header__input"
-          type="text"
-          placeholder="Hippodrome"
+          placeholder="ex : Vincennes"
           value={race.hippodrome}
-          onChange={(e) => onFieldChange('hippodrome', e.target.value)}
-        />
-        <input
-          className="race-header__input"
-          type="date"
-          value={race.date}
-          onChange={(e) => onFieldChange('date', e.target.value)}
+          onChange={update('hippodrome')}
         />
       </div>
 
-      <div className="race-header__actions">
-        <div className="race-header__archive-wrap">
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => setArchiveOpen((v) => !v)}
-          >
-            Archives ({archives.length})
-          </button>
-          {archiveOpen && (
-            <div className="race-header__archive-list">
-              {archives.length === 0 && (
-                <p className="race-header__archive-empty">Aucun papier archivé.</p>
-              )}
-              {archives.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  className="race-header__archive-item"
-                  onClick={() => {
-                    onLoadArchive(a.id)
-                    setArchiveOpen(false)
-                  }}
-                >
-                  <span>{a.courseName || 'Course sans nom'}</span>
-                  <span className="race-header__archive-meta">
-                    {a.hippodrome} — {a.date}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <button type="button" className="btn btn--primary" onClick={onArchive}>
-          Archiver
-        </button>
-        <button type="button" className="btn btn--danger" onClick={onNewRace}>
-          Nouvelle course
-        </button>
+      <div className="race-header__field">
+        <label htmlFor="date">Date</label>
+        <input id="date" type="date" value={race.date} onChange={update('date')} />
       </div>
-    </header>
-  )
+
+      <div className="race-header__field race-header__field--small">
+        <label htmlFor="reunion">Réunion</label>
+        <input
+          id="reunion"
+          type="text"
+          placeholder="R1"
+          value={race.reunion}
+          onChange={update('reunion')}
+        />
+      </div>
+
+      <div className="race-header__field race-header__field--small">
+        <label htmlFor="course">Course</label>
+        <input
+          id="course"
+          type="text"
+          placeholder="C3"
+          value={race.course}
+          onChange={update('course')}
+        />
+      </div>
+
+      <div className="race-header__field race-header__field--wide">
+        <label htmlFor="notes">Notes</label>
+        <input
+          id="notes"
+          type="text"
+          placeholder="Terrain lourd, autostart..."
+          value={race.notes}
+          onChange={update('notes')}
+        />
+      </div>
+    </section>
+  );
 }
