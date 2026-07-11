@@ -44,7 +44,15 @@ export default async function handler(req, res) {
   let html;
   try {
     const pageRes = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TrotScoreApp/1.0)' },
+      headers: {
+        // Un UA auto-déclaré "bot" (ex: TrotScoreApp/1.0) se fait quasi
+        // systématiquement bloquer par le WAF anti-scraping de LeTrot (403).
+        // On envoie donc les en-têtes d'un navigateur desktop standard.
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+      },
     });
     if (!pageRes.ok) {
       res.status(502).json({ error: `LeTrot a répondu ${pageRes.status}` });
