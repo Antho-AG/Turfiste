@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-11T15:53:15.262Z",
+  "generatedAt": "2026-07-13T06:51:55.826Z",
   "daysScanned": 60,
-  "racesProcessed": 28,
+  "racesProcessed": 27,
   "drivers": {
     "RAFFIN|E": {
-      "courses": 13,
+      "courses": 12,
       "victoires": 6,
       "places": 9
     },
     "NIVARD|F": {
-      "courses": 9,
+      "courses": 8,
       "victoires": 3,
       "places": 5
     },
@@ -39,9 +39,9 @@
       "places": 5
     },
     "ABRIVARD|A": {
-      "courses": 6,
+      "courses": 5,
       "victoires": 0,
-      "places": 3
+      "places": 2
     },
     "LAGADEUC|F": {
       "courses": 3,
@@ -59,12 +59,12 @@
       "places": 6
     },
     "BARRIER|A": {
-      "courses": 4,
+      "courses": 3,
       "victoires": 0,
-      "places": 2
+      "places": 1
     },
     "PAU. PH.|P": {
-      "courses": 8,
+      "courses": 7,
       "victoires": 0,
       "places": 4
     },
@@ -82,11 +82,6 @@
       "courses": 5,
       "victoires": 0,
       "places": 1
-    },
-    "BAZIRE M.|J": {
-      "courses": 3,
-      "victoires": 1,
-      "places": 3
     },
     "THOMAIN|D": {
       "courses": 4,
@@ -121,7 +116,7 @@
       "places": 1
     },
     "H.E.|B": {
-      "courses": 9,
+      "courses": 7,
       "victoires": 1,
       "places": 4
     },
@@ -160,20 +155,10 @@
       "victoires": 1,
       "places": 2
     },
-    "LAMARE|T": {
-      "courses": 3,
-      "victoires": 0,
-      "places": 2
-    },
     "PH.|A": {
       "courses": 3,
       "victoires": 0,
       "places": 0
-    },
-    "LOCQUENEUX|D": {
-      "courses": 3,
-      "victoires": 1,
-      "places": 2
     }
   }
 }
