@@ -1,13 +1,7 @@
 {
-  "generatedAt": "2026-08-03T06:58:02.310Z",
+  "generatedAt": "2026-08-10T05:25:15.294Z",
   "daysScanned": 60,
   "racesProcessed": 8,
-  "drivers": {
-    "RAFFIN|E": {
-      "courses": 3,
-      "victoires": 1,
-      "places": 2
-    }
-  },
+  "drivers": {},
   "entraineurs": {}
 }
