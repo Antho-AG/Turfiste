@@ -1,13 +1,7 @@
 {
-  "generatedAt": "2026-08-31T10:31:47.738Z",
+  "generatedAt": "2026-09-07T08:55:29.192Z",
   "daysScanned": 60,
-  "racesProcessed": 10,
+  "racesProcessed": 9,
   "drivers": {},
-  "entraineurs": {
-    "SASSIER|M": {
-      "courses": 3,
-      "victoires": 0,
-      "places": 1
-    }
-  }
+  "entraineurs": {}
 }
