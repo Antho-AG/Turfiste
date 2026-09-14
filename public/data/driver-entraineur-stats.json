@@ -1,7 +1,13 @@
 {
-  "generatedAt": "2026-09-07T08:55:29.192Z",
+  "generatedAt": "2026-09-14T09:34:04.391Z",
   "daysScanned": 60,
-  "racesProcessed": 9,
-  "drivers": {},
+  "racesProcessed": 11,
+  "drivers": {
+    "NIVARD|F": {
+      "courses": 3,
+      "victoires": 0,
+      "places": 0
+    }
+  },
   "entraineurs": {}
 }
