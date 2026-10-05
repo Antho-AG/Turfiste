@@ -1,13 +1,64 @@
 {
-  "generatedAt": "2026-09-28T10:34:23.620Z",
+  "generatedAt": "2026-10-05T11:11:08.322Z",
   "daysScanned": 60,
-  "racesProcessed": 11,
+  "racesProcessed": 9,
   "drivers": {
-    "NIVARD|F": {
+    "ABRIVARD|A": {
+      "courses": 4,
+      "victoires": 2,
+      "places": 3
+    },
+    "RAFFIN|E": {
+      "courses": 3,
+      "victoires": 1,
+      "places": 2
+    },
+    "ABRIVARD|M": {
       "courses": 3,
       "victoires": 0,
+      "places": 1
+    },
+    "GELORMINI|G": {
+      "courses": 3,
+      "victoires": 0,
+      "places": 1
+    },
+    "NIVARD|F": {
+      "courses": 5,
+      "victoires": 0,
       "places": 0
+    },
+    "ROCHARD|B": {
+      "courses": 3,
+      "victoires": 0,
+      "places": 2
+    },
+    "THOMAIN|D": {
+      "courses": 4,
+      "victoires": 1,
+      "places": 2
     }
   },
-  "entraineurs": {}
+  "entraineurs": {
+    "L.CL.|A": {
+      "courses": 3,
+      "victoires": 1,
+      "places": 2
+    },
+    "ABRIVARD|M": {
+      "courses": 3,
+      "victoires": 0,
+      "places": 1
+    },
+    "TH.|D": {
+      "courses": 3,
+      "victoires": 0,
+      "places": 1
+    },
+    "J.P.|M": {
+      "courses": 4,
+      "victoires": 0,
+      "places": 2
+    }
+  }
 }
